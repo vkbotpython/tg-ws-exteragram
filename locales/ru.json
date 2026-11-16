@@ -1,0 +1,19 @@
+{
+  "plugin_name": "tg_ws_bridge",
+  "section_main": "Основное",
+  "section_transport": "Транспорт",
+  "section_fallbacks": "Fallback'ы",
+  "section_connection": "Подключение",
+  "section_debug": "Дебаг",
+  "enabled": "Включено",
+  "listen_host": "Хост прослушивания",
+  "listen_port": "Порт прослушивания",
+  "secret": "Секрет (32 hex)",
+  "generate_secret": "Сгенерировать новый секрет",
+  "start": "Старт",
+  "stop": "Стоп",
+  "restart": "Рестарт",
+  "logs": "Логи",
+  "status": "Статус и статистика",
+  "dump": "Дамп конфигурации прокси"
+}

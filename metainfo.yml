@@ -1,0 +1,24 @@
+id: tg_ws_bridge
+name: "tg_ws_bridge - MTProto WS Bridge"
+description: >-
+  Local MTProto WebSocket bridge for exteraGram. Accepts obfuscated Telegram
+  sessions on 127.0.0.1:1443 and relays them over WebSocket/TLS to DC servers
+  with Cloudflare proxy / Worker / HTTP2 / TCP fallbacks. Port of Flowseal's
+  tg-ws-proxy (MIT).
+author: "@avencores"
+version: "1.0.0"
+icon: "exteraPlugins/1"
+app_version: ">=12.5.1"
+sdk_version: ">=1.4.5.3"
+category: "integrations"
+
+# Pure-Python wheels are bundled under wheels/; these are the PIP fallback.
+requirements:
+  - certifi
+  - httpx[http2]==0.28.1
+  - h2>=4,<5
+  - hpack>=4,<5
+  - hyperframe>=6,<7
+  - anyio
+  - sniffio
+  - idna

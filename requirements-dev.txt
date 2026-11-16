@@ -1,0 +1,7 @@
+# PC-side development / test dependencies only.
+# The plugin itself ships its pure-Python wheels under wheels/.
+pytest>=8
+cryptography>=41
+httpx[http2]==0.28.1
+certifi
+PyYAML

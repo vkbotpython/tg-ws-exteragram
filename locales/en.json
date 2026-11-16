@@ -1,0 +1,19 @@
+{
+  "plugin_name": "tg_ws_bridge",
+  "section_main": "Main",
+  "section_transport": "Transport",
+  "section_fallbacks": "Fallbacks",
+  "section_connection": "Connection",
+  "section_debug": "Debug",
+  "enabled": "Enabled",
+  "listen_host": "Listen host",
+  "listen_port": "Listen port",
+  "secret": "Secret (32 hex)",
+  "generate_secret": "Generate a new secret",
+  "start": "Start",
+  "stop": "Stop",
+  "restart": "Restart",
+  "logs": "Logs",
+  "status": "Status and statistics",
+  "dump": "Dump proxy configuration"
+}
