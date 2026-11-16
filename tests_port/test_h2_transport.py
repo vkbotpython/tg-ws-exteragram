@@ -309,6 +309,14 @@ class H2WireTest(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(await asyncio.wait_for(channel.receive(), 1), b'n' * 40)
             self.respond(poll, b'd' * (128 * 1024))
             self.assertEqual(await asyncio.wait_for(channel.receive(), 1), b'd' * (128 * 1024))
+            # Freeze the recovery loop before asserting: on faster/slower event
+            # loops it may otherwise issue another replay between the last
+            # receive and the assertion, which is unrelated to this scenario.
+            recovery.cancel()
+            try:
+                await recovery
+            except asyncio.CancelledError:
+                pass
             self.assertEqual(channel.replay_rotations, 0)
             self.assertEqual(channel.replay_requests, 1)
 
