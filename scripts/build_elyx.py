@@ -19,6 +19,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # tests stay in the repository but are never shipped to the plugin loader.
 INCLUDE_FILES = (
     'refmap.yml', 'metainfo.yml', 'meta.yml', 'main.py', 'NOTICE.md',
+    'LICENSE',  # GPLv3 requires a copy of the license with the work
 )
 INCLUDE_DIRS = (
     'plugin', 'wsproxy', 'vendor', 'wheels', 'strings', 'locales', 'assets',
