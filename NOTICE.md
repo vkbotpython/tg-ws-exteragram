@@ -1,16 +1,20 @@
-# NOTICE / Attribution
+# NOTICE / Атрибуция
 
-This plugin contains a port of **tg-ws-proxy**, originally developed by
-**Flowseal** and distributed under the MIT License.
+Проект в целом распространяется под **GNU General Public License v3.0** —
+полный текст находится в файле `LICENSE`.
 
-- Original project: <https://github.com/Flowseal/tg-ws-proxy>
-- License: MIT, Copyright (c) 2026 Flowseal
+Часть кода (`wsproxy/*`) является портом **tg-ws-proxy** авторства **Flowseal**,
+распространяемого под лицензией MIT. Условия MIT требуют сохранить оригинальное
+уведомление об авторстве и текст лицензии — они приведены ниже и остаются в силе
+для этих файлов. MIT-совместим с GPL-3.0, поэтому включение этого кода в
+GPL-проект допустимо.
 
-The protocol engine (`wsproxy/*`) is derived from the original `proxy/*`
-modules. Changes made for the Elyx port include: removal of the CLI/tray and
-desktop update checks, an Android-friendly CA bundle lookup, optional HTTP/2
-dependencies, a background-loop lifecycle wrapper, and a multi-backend AES-CTR
-shim.
+- Оригинальный проект: <https://github.com/Flowseal/tg-ws-proxy>
+- Оригинальная лицензия: MIT, Copyright (c) 2026 Flowseal
+
+Изменения, сделанные при порте в Elyx: удаление CLI/tray и десктопной проверки
+обновлений, поиск CA-бандла для Android, опциональные HTTP/2-зависимости,
+обёртка жизненного цикла с фоновым event loop и мультибэкендная реализация AES-CTR.
 
 ```text
 MIT License
@@ -36,6 +40,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-The bundled `certifi` CA bundle is distributed under the Mozilla Public
-License 2.0; its license is included in the corresponding wheel under
-`wheels/`.
+Бандл корневых сертификатов `certifi` (`assets/cacert.pem`, `wheels/certifi-*.whl`)
+распространяется по лицензии Mozilla Public License 2.0; её текст входит в
+соответствующий wheel.

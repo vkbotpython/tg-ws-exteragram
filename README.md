@@ -2,49 +2,49 @@
 
 [![tests](https://github.com/avencores/tg_ws_bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/avencores/tg_ws_bridge/actions/workflows/tests.yml)
 
-**Local MTProto → WebSocket bridge as an [exteraGram / AyuGram](https://exteragram.org) Elyx plugin.**
+**Локальный мост MTProto → WebSocket в виде плагина exteraGram / AyuGram формата Elyx.**
 
-A port of [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy) (MIT) to Python 3.11 / Chaquopy. It accepts obfuscated Telegram sessions on `127.0.0.1:1443`, extracts the DC ID from the initialization packet and relays traffic over WebSocket/TLS to `kwsN.web.telegram.org`, with Cloudflare proxy / Worker / HTTP2 / TCP fallbacks.
+Порт [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy) (MIT) на Python 3.11 / Chaquopy. Плагин принимает обфусцированные сессии Telegram на `127.0.0.1:1443`, извлекает ID DC из пакета инициализации и передаёт трафик через WebSocket/TLS на `kwsN.web.telegram.org`, с fallback'ами на Cloudflare proxy / Worker / HTTP2 / TCP.
 
-Everything needed for debugging — logs, live statistics and a proxy-config dump — is available from the plugin settings. **No adb required.**
+Вся отладка — логи, живая статистика и дамп конфигурации прокси — доступна прямо из настроек плагина. **adb не требуется.**
 
-## Features
+## Возможности
 
-- Full protocol parity with the original proxy engine (ported `proxy/*` → `wsproxy/`)
-- Automatic proxy activation via reflection, with a `tg://proxy` deep-link fallback
-- AES-CTR with a Java JCE → `cryptography` → pure-Python → OpenSSL backend chain
-- Bundled pure-Python wheels; no compiler or native modules on the device
-- Background asyncio loop in its own thread with safe stop/restart and reload protection
-- In-plugin log viewer (ring buffer + rotating log file) and status/statistics screen
-- Optional Fake TLS (`ee`-secret) masking, custom DC redirects, PROXY protocol support
+- Полный паритет протокольной логики с оригинальным прокси (`proxy/*` → `wsproxy/`)
+- Автоматическое включение прокси через рефлексию с фолбэком на `tg://proxy`
+- AES-CTR с цепочкой бэкендов: Java JCE → `cryptography` → чистый Python → OpenSSL
+- В комплекте чистые Python-зависимости (wheels) — без компилятора и нативных модулей на устройстве
+- Фоновый asyncio-цикл в отдельном потоке: корректный stop/restart и защита от утечек при hot-reload
+- Просмотр логов (кольцевой буфер + ротирующийся файл) и экран статуса/статистики внутри плагина
+- Опциональная маскировка Fake TLS (`ee`-secret), свои перенаправления DC, поддержка PROXY protocol
 
-## Install
+## Установка
 
-1. Grab `tg_ws_bridge-*.elyx` from [Releases](../../releases), or build it yourself (below).
-2. Send the file to Saved Messages in exteraGram and open it → **Install Plugin**.
-3. Open the plugin settings. A 32-hex secret is generated automatically.
-4. Leave **Enabled** on. With **Apply proxy automatically** enabled the plugin tries reflection first; if the build's proxy API is unknown it opens `tg://proxy` for confirmation.
-5. Open **Status and statistics**: `RUNNING`, growing `total` / `up` / `down`, and `DCx -> WS pool hit` in **Logs** confirm the relay works.
+1. Скачайте `tg_ws_bridge-*.elyx` из [Releases](../../releases) или соберите archive самостоятельно (см. ниже).
+2. Отправьте файл в «Избранное» в exteraGram и откройте его → **Install Plugin**.
+3. Откройте настройки плагина. 32-символьный hex-секрет создаётся автоматически.
+4. Оставьте **Enabled** включённым. При включённом **Apply proxy automatically** плагин сначала пытается рефлексию; если API прокси в этой сборке неизвестен — открывает `tg://proxy` для подтверждения.
+5. Откройте **Status and statistics**: `RUNNING`, растущие счётчики `total` / `up` / `down` и строка `DCx -> WS pool hit` в **Logs** подтверждают работу моста.
 
-Use **Open tg://proxy** or **Copy tg://proxy link** if you prefer to connect manually.
+Для ручного подключения используйте **Open tg://proxy** или **Copy tg://proxy link**.
 
-## Build from source
+## Сборка из исходников
 
-Canonical (ElyxBuilder):
+Каноничный способ (ElyxBuilder):
 
 ```bash
 elyb build -nf
 # builds/tg_ws_bridge-1.0.0.elyx
 ```
 
-Dependency-free fallback:
+Запасной способ без дополнительных зависимостей:
 
 ```bash
 python scripts/build_elyx.py                    # builds/tg_ws_bridge-1.0.0.elyx
 python -c "from scripts.build_elyx import verify; verify()"
 ```
 
-To refresh bundled wheels (run on a PC, not on the device):
+Обновление bundled wheels (только на ПК, не на устройстве):
 
 ```bash
 pip download --only-binary=:all: --platform any --python-version 3.11 \
@@ -52,55 +52,59 @@ pip download --only-binary=:all: --platform any --python-version 3.11 \
   "httpx[http2]==0.28.1" certifi sniffio
 ```
 
-## Repository layout
+## Структура репозитория
 
 ```
-refmap.yml          Elyx component map (main / metainfo / strings / assets / wheels)
+refmap.yml          карта компонентов Elyx (main / metainfo / strings / assets / wheels)
 metainfo.yml        id, sdk_version >=1.4.5.3, requirements
-meta.yml            compatibility copy for older Elyx validators
+meta.yml            копия для совместимости со старыми валидаторами Elyx
 main.py             TgWsBridgePlugin(BasePlugin)
-plugin/             SDK compatibility, runtime, config bridge, proxy hook,
-                    log bus, debug UI, crypto backend
-wsproxy/            ported proxy core (protocol logic unchanged)
-vendor/pyaes/       pure-Python AES fallback (NIST-vector tested)
+plugin/             совместимость с SDK, рантайм, мост настроек, хук прокси,
+                    лог-шина, дебаг-UI, криптобэкенд
+wsproxy/            портированное ядро прокси (протокольная логика не изменена)
+vendor/pyaes/       чистый Python AES (проверен по NIST-векторам)
 wheels/             certifi, httpx, httpcore, h11, h2, hpack, hyperframe,
-                    anyio, sniffio, idna (all py3-none-any)
-strings/ locales/   en/ru strings (YAML for Elyx, JSON for compatibility)
-assets/cacert.pem   bundled CA bundle for Chaquopy
-docs/PLAN.ru.md     original Russian implementation plan
-tests_port/         ported core tests + plugin-layer tests
-scripts/            build/verify helpers
+                    anyio, sniffio, idna (все py3-none-any)
+strings/ locales/   строки en/ru (YAML для Elyx, JSON для совместимости)
+assets/cacert.pem   bundled CA-бандл для Chaquopy
+docs/PLAN.ru.md     исходный план реализации
+tests_port/         портированные тесты ядра + тесты плагина
+scripts/            скрипты сборки и проверки
 ```
 
-## Development
+## Разработка
 
 ```bash
 python -m pip install -r requirements-dev.txt
 python -m pytest tests_port -q
 ```
 
-Current result: **230 passed, 415 subtests passed** (Python 3.11+).
-CI runs the suite on Python 3.11, 3.12 and 3.13.
+Текущий результат: **230 passed, 415 subtests passed** (Python 3.11+).
+CI прогоняет тесты на Python 3.11, 3.12 и 3.13.
 
-### AES backend
+### AES-бэкенд
 
-Selected automatically; overridable with `TGWS_AES_BACKEND=java|cryptography|pyaes|openssl`:
+Выбирается автоматически, переопределяется через `TGWS_AES_BACKEND=java|cryptography|pyaes|openssl`:
 
-1. `java` — `javax.crypto.Cipher("AES/CTR/NoPadding")` (preferred on Android)
-2. `cryptography` — desktop / tests
-3. `pyaes` — vendored pure Python (NIST-vector verified)
-4. `openssl` — ctypes libcrypto fallback
+1. `java` — `javax.crypto.Cipher("AES/CTR/NoPadding")` (предпочтительно на Android)
+2. `cryptography` — ПК / тесты
+3. `pyaes` — встроенный чистый Python (проверен по NIST-векторам)
+4. `openssl` — ctypes-обёртка над libcrypto
 
-All backends use a 128-bit big-endian counter, matching the original CTR mode.
+Все бэкенды используют 128-битный big-endian счётчик, как оригинальный режим CTR.
 
-## Notes and limitations
+## Ограничения и примечания
 
-- The exact `ConnectionsManager.setProxySettings(...)` signature differs between exteraGram builds. Use **Dump proxy configuration** in the debug UI to inspect the target build; the `tg://proxy` fallback always works.
-- Doze / process death can stop the listener. The plugin restarts it on `START`/`RESUME`; change the port if 1443 is taken.
-- HTTP/2 media needs the bundled wheels; without them the bridge falls back to WS/CF/TCP automatically.
-- Fake TLS needs TLS 1.3 in the platform `ssl`; otherwise random ApplicationData record sizes are used.
-- Do not publish your proxy secret — treats it like a password.
+- Точная сигнатура `ConnectionsManager.setProxySettings(...)` отличается в разных сборках exteraGram. Для интроспекции используйте **Dump proxy configuration** в дебаг-меню; фолбэк `tg://proxy` работает всегда.
+- Doze / убийство процесса может остановить слушатель. Плагин перезапускает его на `START`/`RESUME`; если порт 1443 занят — измените его в настройках.
+- HTTP/2 для медиа требует bundled wheels; без них мост автоматически использует WS/CF/TCP.
+- Fake TLS требует TLS 1.3 в системном `ssl`; иначе используются случайные размеры ApplicationData.
+- Не публикуйте секрет прокси — обращайтесь с ним как с паролем.
 
-## License
+## Лицензия
 
-MIT — see [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). The original `tg-ws-proxy` source tree was removed after the port; attribution and the full original license text are retained in those files. Bundled `certifi` data is MPL-2.0 (license included in its wheel).
+**GNU GPL v3.0** — полный текст в [LICENSE](LICENSE).
+
+Ядро `wsproxy/` является портом MIT-проекта tg-ws-proxy, поэтому оригинальное
+MIT-уведомление сохранено в [NOTICE.md](NOTICE.md). Бандл `certifi` распространяется
+по MPL-2.0 (текст входит в соответствующий wheel).

@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.pem -text
+*.whl -text
+*.png -text
+*.ico -text
