@@ -15,7 +15,7 @@
 
 # tg_ws_bridge
 
-**Локальный мост MTProto → WebSocket в виде плагина exteraGram / AyuGram формата Elyx.**
+**Локальный мост MTProto → WebSocket в виде одного файла `.plugin` для exteraGram / AyuGram.**
 
 Порт [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy) (MIT) на Python 3.11 / Chaquopy. Плагин принимает обфусцированные сессии Telegram на `127.0.0.1:1443`, извлекает ID DC из пакета инициализации и передаёт трафик через WebSocket/TLS на `kwsN.web.telegram.org`, с fallback'ами на Cloudflare proxy / Worker / HTTP2 / TCP.
 
@@ -33,7 +33,7 @@
 
 ## Установка
 
-1. Скачайте `tg_ws_bridge-*.elyx` из [Releases](../../releases) или соберите archive самостоятельно (см. ниже).
+1. Скачайте `tg_ws_bridge-*.plugin` из [Releases](../../releases) или соберите файл самостоятельно (см. ниже).
 2. Отправьте файл в «Избранное» в exteraGram и откройте его → **Install Plugin**.
 3. Откройте настройки плагина. 32-символьный hex-секрет создаётся автоматически.
 4. Оставьте **Enabled** включённым. При включённом **Apply proxy automatically** плагин сначала пытается рефлексию; если API прокси в этой сборке неизвестен — открывает `tg://proxy` для подтверждения.
@@ -44,24 +44,26 @@
 ## Сборка через GitHub Actions (вручную)
 
 1. Откройте вкладку **Actions** → workflow **build plugin** → **Run workflow**.
-2. При желании укажите метку версии (по умолчанию используется `manual-<номер run'а>`).
-3. После завершения скачайте артефакт `tg_ws_bridge-<версия>.elyx` со страницы run'а.
-4. Отправьте `.elyx` в «Избранное» в клиенте и откройте файл для установки.
+2. При желании укажите метку версии (по умолчанию `manual-<номер run'а>`).
+3. Скачайте артефакт `tg_ws_bridge-<версия>.plugin` со страницы run'а.
+4. Отправьте `.plugin` в «Избранное» в клиенте и откройте файл для установки.
 
-Workflow проверяет состав пакета (обязательные `refmap.yml`, `main.py`, `LICENSE`,
-`NOTICE.md`, `cacert.pem`) и хранит артефакт 90 дней. По тегу `v*` отдельный
-workflow `release` публикует готовый архив в Releases.
+Результат — **один самодостаточный файл**: ядро, слой плагина, ассеты и все
+чистые Python-зависимости встроены в него. При импорте плагин распаковывает
+бандл в кэш приложения и работает без pip и без adb. Workflow проверяет
+метаданные и класс плагина через AST и хранит артефакт 90 дней. По тегу `v*`
+workflow `release` публикует `.plugin` в Releases.
 
 ## Сборка из исходников
 
-Каноничный способ (ElyxBuilder):
+Основной способ (один файл `.plugin`):
 
 ```bash
-elyb build -nf
-# builds/tg_ws_bridge-1.0.0.elyx
+python scripts/build_plugin.py
+# builds/tg_ws_bridge-1.0.0.plugin
 ```
 
-Запасной способ без дополнительных зависимостей:
+Альтернативный multi-file формат `.elyx` остаётся доступным:
 
 ```bash
 python scripts/build_elyx.py                    # builds/tg_ws_bridge-1.0.0.elyx
@@ -93,7 +95,7 @@ strings/ locales/   строки en/ru (YAML для Elyx, JSON для совме
 assets/cacert.pem   bundled CA-бандл для Chaquopy
 docs/PLAN.ru.md     исходный план реализации
 tests_port/         портированные тесты ядра + тесты плагина
-scripts/            скрипты сборки и проверки
+scripts/            сборка одного .plugin (build_plugin.py), .elyx (build_elyx.py), проверки
 ```
 
 ## Разработка

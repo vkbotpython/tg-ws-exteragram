@@ -1,7 +1,7 @@
 name: build plugin
 
 # Manual build: Actions -> "build plugin" -> Run workflow.
-# Produces a ready-to-install .elyx artifact for exteraGram / AyuGram.
+# Produces a single self-contained .plugin file for exteraGram / AyuGram.
 
 on:
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
       - name: Install build dependencies
         run: pip install PyYAML
 
-      - name: Verify package
+      - name: Verify source package
         run: python -c "from scripts.build_elyx import verify; verify()"
 
       - name: Prepare version label
@@ -43,27 +43,45 @@ jobs:
           echo "value=$v" >> "$GITHUB_OUTPUT"
           echo "Archive version: $v"
 
-      - name: Build .elyx
-        run: python scripts/build_elyx.py "builds/tg_ws_bridge-${{ steps.ver.outputs.value }}.elyx"
+      - name: Build single-file .plugin
+        run: python scripts/build_plugin.py "builds/tg_ws_bridge-${{ steps.ver.outputs.value }}.plugin"
 
-      - name: Check archive contents
+      - name: Check plugin structure
         shell: bash
         run: |
           python - <<'PY'
-          import glob, zipfile
-          path = glob.glob('builds/*.elyx')[0]
-          with zipfile.ZipFile(path) as zf:
-              names = zf.namelist()
-          for required in ('refmap.yml', 'main.py', 'LICENSE', 'NOTICE.md', 'assets/cacert.pem'):
-              assert required in names, 'missing in archive: ' + required
-          print('Archive OK:', path)
-          print('Files:', len(names), '| Wheels:', len([n for n in names if n.startswith('wheels/')]))
+          import ast, glob
+          path = glob.glob('builds/*.plugin')[0]
+          with open(path, encoding='utf-8') as fh:
+              tree = ast.parse(fh.read(), filename=path)
+          def literal(node):
+              if isinstance(node, ast.Constant):
+                  return node.value
+              if isinstance(node, (ast.List, ast.Tuple)):
+                  return [literal(item) for item in node.elts]
+              return None
+
+          constants = {
+              node.targets[0].id: literal(node.value)
+              for node in tree.body
+              if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
+          }
+          for key in ('__id__', '__name__', '__version__', '__sdk_version__', '__requirements__'):
+              assert key in constants, 'missing metadata: ' + key
+          classes = [
+              node for node in tree.body
+              if isinstance(node, ast.ClassDef)
+              and any(isinstance(b, ast.Name) and b.id == 'BasePlugin' for b in node.bases)
+          ]
+          assert any(c.name == 'TgWsBridgePlugin' for c in classes), 'plugin class not found'
+          print('Plugin OK:', path)
+          print('Metadata:', constants['__id__'], constants['__version__'])
           PY
 
-      - name: Upload installable artifact
+      - name: Upload installable plugin
         uses: actions/upload-artifact@v7
         with:
-          name: tg_ws_bridge-${{ steps.ver.outputs.value }}.elyx
-          path: builds/*.elyx
+          name: tg_ws_bridge-${{ steps.ver.outputs.value }}.plugin
+          path: builds/*.plugin
           if-no-files-found: error
           retention-days: 90

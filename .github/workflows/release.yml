@@ -19,12 +19,12 @@ jobs:
           cache-dependency-path: requirements-dev.txt
       - name: Install build dependencies
         run: pip install PyYAML
-      - name: Verify package
+      - name: Verify source package
         run: python -c "from scripts.build_elyx import verify; verify()"
-      - name: Build .elyx
-        run: python scripts/build_elyx.py "builds/tg_ws_bridge-${{ github.ref_name }}.elyx"
+      - name: Build single-file .plugin
+        run: python scripts/build_plugin.py "builds/tg_ws_bridge-${{ github.ref_name }}.plugin"
       - name: Publish release asset
         uses: softprops/action-gh-release@v3
         with:
-          files: builds/*.elyx
+          files: builds/*.plugin
           generate_release_notes: true
