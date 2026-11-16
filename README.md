@@ -15,8 +15,6 @@
 
 # tg_ws_bridge
 
-[![tests](https://github.com/avencores/tg_ws_bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/avencores/tg_ws_bridge/actions/workflows/tests.yml)
-
 **Локальный мост MTProto → WebSocket в виде плагина exteraGram / AyuGram формата Elyx.**
 
 Порт [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy) (MIT) на Python 3.11 / Chaquopy. Плагин принимает обфусцированные сессии Telegram на `127.0.0.1:1443`, извлекает ID DC из пакета инициализации и передаёт трафик через WebSocket/TLS на `kwsN.web.telegram.org`, с fallback'ами на Cloudflare proxy / Worker / HTTP2 / TCP.
